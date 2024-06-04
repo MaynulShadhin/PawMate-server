@@ -1,7 +1,7 @@
 const express = require('express');
 const app = express()
 const cors = require('cors');
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 require('dotenv').config();
 const port = process.env.PORT || 5000;
 
@@ -25,10 +25,35 @@ async function run() {
     // await client.connect();
 
     const petCollection = client.db("PawMateDb").collection("pet");
+    const donationCollection = client.db("PawMateDb").collection("donationCamp")
 
-    app.get('/pets', async(req,res)=>{
-        const result = await petCollection.find().toArray()
-        res.send(result)
+
+    //get data for pets
+    app.get('/pets', async (req, res) => {
+      const result = await petCollection.find().toArray()
+      res.send(result)
+    })
+
+    //getting details of single pet
+    app.get('/pets/:id', async (req, res) => {
+      const id = req.params.id
+      const query = { _id: new ObjectId(id) }
+      const result = await petCollection.findOne(query)
+      res.send(result)
+    })
+
+    //getting categories of pet
+    app.get('/pets/:category', async (req, res) => {
+      const category = req.params.category
+      const cursor = petCollection.find({ pet_category: category })
+      const result = await cursor.toArray()
+      res.send(result)
+    })
+
+    //get data for donation camp
+    app.get('/donation-camp', async (req, res) => {
+      const result = await donationCollection.find().toArray()
+      res.send(result)
     })
 
     // // Send a ping to confirm a successful connection
@@ -42,10 +67,10 @@ async function run() {
 run().catch(console.dir);
 
 
-app.get('/', (req,res)=>{
-    res.send('PawMate is running')
+app.get('/', (req, res) => {
+  res.send('PawMate is running')
 })
 
-app.listen(port, ()=>{
-    console.log(`PawMate is running on port ${port}`)
+app.listen(port, () => {
+  console.log(`PawMate is running on port ${port}`)
 })
