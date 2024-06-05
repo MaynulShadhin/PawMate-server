@@ -35,24 +35,38 @@ async function run() {
     })
 
     //getting details of single pet
-    app.get('/pets/:id', async (req, res) => {
+    app.get('/pet/:id', async (req, res) => {
       const id = req.params.id
       const query = { _id: new ObjectId(id) }
       const result = await petCollection.findOne(query)
       res.send(result)
     })
 
+    app.post('/pet', async(req,res)=>{
+      const pet = req.body;
+      const result = await petCollection.insertOne(pet)
+      res.send(result);
+    })
+
     //getting categories of pet
-    app.get('/pets/:category', async (req, res) => {
-      const category = req.params.category
-      const cursor = petCollection.find({ pet_category: category })
-      const result = await cursor.toArray()
+    // app.get('/pets/:category', async (req, res) => {
+    //   const category = req.params.category
+    //   const cursor = petCollection.find({ pet_category: category })
+    //   const result = await cursor.toArray()
+    //   res.send(result)
+    // })
+
+    //get data for donation camp
+    app.get('/donation-camps', async (req, res) => {
+      const result = await donationCollection.find().toArray()
       res.send(result)
     })
 
-    //get data for donation camp
-    app.get('/donation-camp', async (req, res) => {
-      const result = await donationCollection.find().toArray()
+    //getting details of single donation
+    app.get('/donation-camp/:id', async (req, res) => {
+      const id = req.params.id
+      const query = { _id: new ObjectId(id) }
+      const result = await donationCollection.findOne(query)
       res.send(result)
     })
 
