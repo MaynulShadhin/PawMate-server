@@ -72,6 +72,19 @@ async function run() {
       res.send(result)
     })
 
+    //mark a pet as adopted
+    app.put('/pet/adopted/:id', async(req,res)=>{
+      const id = req.params.id;
+      const query = {_id: new ObjectId(id)};
+      const updateDoc = {
+        $set: {
+          adopted: true
+        }
+      };
+      const result = await petCollection.updateOne(query,updateDoc);
+      res.send(result)
+    })
+
     //post a pet data
     app.post('/pet', async(req,res)=>{
       const pet = req.body;
