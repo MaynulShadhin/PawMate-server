@@ -42,6 +42,14 @@ async function run() {
       res.send(result)
     })
 
+    //getting data posted by a user
+    app.get('/pets/:email', async(req,res)=>{
+      const email = req.params.email;
+      const query = {email: email}
+      const result = await petCollection.find(query).toArray()
+      res.send(result)
+    })
+
     app.post('/pet', async(req,res)=>{
       const pet = req.body;
       const result = await petCollection.insertOne(pet)
