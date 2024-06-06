@@ -58,6 +58,21 @@ async function run() {
       res.send(result)
     })
 
+    //update a pet data
+    app.patch('/pet/:id', async(req,res)=>{
+      const id = req.params.id;
+      const petData = req.body;
+      const query = {_id: new ObjectId(id)}
+      const updateDoc = {
+        $set:{
+          ...petData
+        }
+      }
+      const result = await petCollection.updateOne(query,updateDoc)
+      res.send(result)
+    })
+
+    //post a pet data
     app.post('/pet', async(req,res)=>{
       const pet = req.body;
       const result = await petCollection.insertOne(pet)
