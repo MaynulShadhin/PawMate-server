@@ -24,8 +24,41 @@ async function run() {
     // Connect the client to the server	(optional starting in v4.7)
     // await client.connect();
 
+    const userCollection = client.db("PawMateDb").collection("users")
     const petCollection = client.db("PawMateDb").collection("pet");
-    const donationCollection = client.db("PawMateDb").collection("donationCamp")
+    const donationCollection = client.db("PawMateDb").collection("donationCamp");
+    const adoptionCollection = client.db("PawMateDb").collection("adoptionRequest");
+
+
+    //User api
+    app.get('/users', async (req, res) => {
+      const result = await userCollection.find().toArray();
+      res.send(result)
+    })
+
+    app.post('/users', async (req, res) => {
+      const user = req.body;
+      //insert email if user does not exist
+      const query = { email: user.email }
+      const existingUser = await userCollection.findOne(query)
+      if (existingUser) {
+        return res.send({ message: "user already exists", insertedId: null })
+      }
+      const result = await userCollection.insertOne(user);
+      res.send(result);
+    })
+
+    app.patch('/users/admin/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = {_id: new ObjectId(id)}
+      const updatedDoc = {
+        $set: {
+          role: 'admin'
+        }
+      }
+      const result = await userCollection.updateOne(query, updatedDoc);
+      res.send(result);
+    })
 
 
     //get data for pets
@@ -43,52 +76,59 @@ async function run() {
     })
 
     //getting data posted by a user
-    app.get('/pets/:email', async(req,res)=>{
+    app.get('/pets/:email', async (req, res) => {
       const email = req.params.email;
-      const query = {email: email}
+      const query = { email: email }
       const result = await petCollection.find(query).toArray()
       res.send(result)
     })
 
     //delete a pet
-    app.delete('/pet/:id', async(req,res)=>{
+    app.delete('/pet/:id', async (req, res) => {
       const id = req.params.id
-      const query = {_id: new ObjectId(id)}
-      const result= await petCollection.deleteOne(query)
+      const query = { _id: new ObjectId(id) }
+      const result = await petCollection.deleteOne(query)
       res.send(result)
     })
 
     //update a pet data
-    app.patch('/pet/:id', async(req,res)=>{
+    app.patch('/pet/:id', async (req, res) => {
       const id = req.params.id;
       const petData = req.body;
-      const query = {_id: new ObjectId(id)}
+      const query = { _id: new ObjectId(id) }
       const updateDoc = {
-        $set:{
+        $set: {
           ...petData
         }
       }
-      const result = await petCollection.updateOne(query,updateDoc)
+      const result = await petCollection.updateOne(query, updateDoc)
       res.send(result)
     })
 
     //mark a pet as adopted
-    app.put('/pet/adopted/:id', async(req,res)=>{
+    app.put('/pet/adopted/:id', async (req, res) => {
       const id = req.params.id;
-      const query = {_id: new ObjectId(id)};
+      const query = { _id: new ObjectId(id) };
       const updateDoc = {
         $set: {
           adopted: true
         }
       };
-      const result = await petCollection.updateOne(query,updateDoc);
+      const result = await petCollection.updateOne(query, updateDoc);
       res.send(result)
     })
 
     //post a pet data
-    app.post('/pet', async(req,res)=>{
+    app.post('/pet', async (req, res) => {
       const pet = req.body;
       const result = await petCollection.insertOne(pet)
+      res.send(result);
+    })
+
+    //post a adopt request
+    app.post('/adoption', async (req, res) => {
+      const adoption = req.body;
+      const result = await adoptionCollection.insertOne(adoption)
       res.send(result);
     })
 
