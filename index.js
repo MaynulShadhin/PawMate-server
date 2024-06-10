@@ -31,6 +31,7 @@ async function run() {
     const petCollection = client.db("PawMateDb").collection("pet");
     const donationCollection = client.db("PawMateDb").collection("donationCamp");
     const adoptionCollection = client.db("PawMateDb").collection("adoptionRequest");
+    const donatesCollection = client.db("PawMateDb").collection("donates");
 
 
     // PAYMENT
@@ -47,6 +48,13 @@ async function run() {
         clientSecret: paymentIntent.client_secret
       })
     });
+
+    //get payment 
+    app.post('/donates', async (req, res) => {
+      const donates = req.body;
+      const result = await donatesCollection.insertOne(donates)
+      res.send(result)
+    })
 
     //jwt api
     app.post('/jwt', async (req, res) => {
@@ -222,11 +230,28 @@ async function run() {
     })
 
     //post a donation camp data
-    app.post('/donation-camp',async(req,res)=>{
+    app.post('/donation-camp', async (req, res) => {
       const donation = req.body;
       const result = await donationCollection.insertOne(donation)
       res.send(result)
     })
+
+    //get donation by email
+    app.get('/donation-camps/:email', async (req, res) => {
+      const email = req.params.email;
+      const query = { email: email }
+      const result = await donationCollection.find(query).toArray()
+      res.send(result)
+    })
+
+    //get donators by postId
+    app.get('/donation-camps/donators/:postId', async(req,res)=>{
+      const postId = req.params.postId;
+      const query ={postId: postId};
+      const result = await donatesCollection.find(query).toArray()
+      res.send(result);
+    })
+
 
     // // Send a ping to confirm a successful connection
     // await client.db("admin").command({ ping: 1 });
