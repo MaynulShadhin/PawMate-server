@@ -52,8 +52,35 @@ async function run() {
     //get payment 
     app.post('/donates', async (req, res) => {
       const donates = req.body;
+      const { postId, donatedAmount } = donates
       const result = await donatesCollection.insertOne(donates)
+      const updateResult = await donationCollection.updateOne(
+        { _id: new ObjectId(postId) },
+        { $inc: { donatedAmount: donatedAmount } }
+      )
+      res.send({ result, updateResult })
+    })
+
+    //get user donates using email
+    app.get('/donates/:email', async (req, res) => {
+      const email = req.params.email;
+      const query = { email: email };
+      const result = await donatesCollection.find(query).toArray();
       res.send(result)
+    })
+    //delete a donate data if user ask for refund
+    app.delete('/donate/:id', async (req, res) => {
+      const id = req.params.id
+      const query = { _id: new ObjectId(id) }
+      const donate = await donatesCollection.findOne(query)
+      const { postId, donatedAmount } = donate
+      const deleteResult = await donatesCollection.deleteOne({ _id: new ObjectId(id) });
+      //update donation collection's donatedAmount
+      const updateResult = await donationCollection.updateOne(
+        { _id: new ObjectId(postId) },
+        { $inc: { donatedAmount: -donatedAmount } }
+      );
+      res.send({deleteResult, updateResult})
     })
 
     //jwt api
@@ -65,7 +92,6 @@ async function run() {
 
     //middlewares
     const verifyToken = (req, res, next) => {
-      console.log('inside', req.headers.authorization)
       if (!req.headers.authorization) {
         return res.status(401).send({ message: 'unauthorized access' })
       }
@@ -250,7 +276,7 @@ async function run() {
       res.send(result)
     })
 
-    //get donation by email
+    //get donation camp by email
     app.get('/donation-camps/:email', async (req, res) => {
       const email = req.params.email;
       const query = { email: email }
