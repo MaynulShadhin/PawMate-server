@@ -86,7 +86,7 @@ async function run() {
     //jwt api
     app.post('/jwt', async (req, res) => {
       const user = req.body;
-      const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '1hr' });
+      const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '30d' });
       res.send({ token });
     })
 
@@ -193,7 +193,7 @@ async function run() {
     })
 
     //update a pet data
-    app.patch('/pet/:id', async (req, res) => {
+    app.patch('/updatePet/:id', async (req, res) => {
       const id = req.params.id;
       const petData = req.body;
       const query = { _id: new ObjectId(id) }
@@ -220,7 +220,7 @@ async function run() {
     })
 
     //toggle a pet adopted or not adopted for admin
-    app.put('/pet/toggleAdoption/:id',verifyToken,verifyAdmin, async (req, res) => {
+    app.put('/pet/toggleAdoption/:id', verifyToken, verifyAdmin, async (req, res) => {
       const id = req.params.id;
       console.log(id)
       const query = { _id: new ObjectId(id) };
@@ -292,6 +292,15 @@ async function run() {
       res.send(result)
     })
 
+    //delete a donation camp by admin
+    app.delete('/donation-camp/:id', verifyToken, verifyAdmin, async (req, res) => {
+      const id = req.params.id;
+      console.log(id)
+      const query = { _id: new ObjectId(id) };
+      const result = await donationCollection.deleteOne(query);
+      res.send(result)
+    })
+
     //getting details of single donation
     app.get('/donation-camp/:id', async (req, res) => {
       const id = req.params.id
@@ -301,7 +310,7 @@ async function run() {
     })
 
     //update a donation-camp
-    app.patch('/donation-camp/:id', async (req, res) => {
+    app.patch('/updateDonation-camp/:id', async (req, res) => {
       const id = req.params.id;
       const donationData = req.body;
       const query = { _id: new ObjectId(id) }
