@@ -220,7 +220,7 @@ async function run() {
     })
 
     //toggle a pet adopted or not adopted for admin
-    app.put('/pet/toggleAdoption/:id', async (req, res) => {
+    app.put('/pet/toggleAdoption/:id',verifyToken,verifyAdmin, async (req, res) => {
       const id = req.params.id;
       console.log(id)
       const query = { _id: new ObjectId(id) };
