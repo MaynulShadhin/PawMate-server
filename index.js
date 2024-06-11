@@ -80,7 +80,7 @@ async function run() {
         { _id: new ObjectId(postId) },
         { $inc: { donatedAmount: -donatedAmount } }
       );
-      res.send({deleteResult, updateResult})
+      res.send({ deleteResult, updateResult })
     })
 
     //jwt api
@@ -219,6 +219,20 @@ async function run() {
       res.send(result)
     })
 
+    //toggle a pet adopted or not adopted for admin
+    app.put('/pet/toggleAdoption/:id', async (req, res) => {
+      const id = req.params.id;
+      console.log(id)
+      const query = { _id: new ObjectId(id) };
+      const updateDoc = {
+        $set: {
+          adopted: req.body.adopted
+        }
+      }
+      const result = await petCollection.updateOne(query, updateDoc);
+      res.send(result);
+    })
+
     //post a pet data
     app.post('/pet', async (req, res) => {
       const pet = req.body;
@@ -240,6 +254,37 @@ async function run() {
     //   const result = await cursor.toArray()
     //   res.send(result)
     // })
+
+
+    //get adoption requests
+    app.get('/adoption-requests/:email', verifyToken, async (req, res) => {
+      const email = req.decoded.email;
+      const query = { ownerEmail: email }
+      const result = await adoptionCollection.find(query).toArray();
+      res.send(result);
+    })
+
+    //adoption request accept
+    app.put('/adoption/accept/:id', async (req, res) => {
+      const adoptionRequestId = req.params.id
+      const adoptionReqQuery = { _id: new ObjectId(adoptionRequestId) }
+      const adoptionRequest = await adoptionCollection.findOne(adoptionReqQuery);
+      const petId = adoptionRequest.petId;
+      const petQuery = { _id: new ObjectId(petId) };
+      await petCollection.updateOne(petQuery, {
+        $set: { adopted: true }
+      });
+      const updatedPet = await petCollection.findOne(petQuery);
+      res.send(updatedPet);
+    })
+
+    //adoption request rejected
+    app.delete('/adoption/reject/:id', async (req, res) => {
+      const id = req.params.id
+      const query = { _id: new ObjectId(id) }
+      const result = await adoptionCollection.deleteOne(query)
+      res.send(result)
+    })
 
     //get data for donation camp
     app.get('/donation-camps', async (req, res) => {
