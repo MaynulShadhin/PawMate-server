@@ -229,6 +229,20 @@ async function run() {
       res.send(result)
     })
 
+    //update a donation-camp
+    app.patch('/donation-camp/:id', async (req, res) => {
+      const id = req.params.id;
+      const donationData = req.body;
+      const query = { _id: new ObjectId(id) }
+      const updateDoc = {
+        $set: {
+          ...donationData
+        }
+      }
+      const result = await donationCollection.updateOne(query, updateDoc)
+      res.send(result)
+    })
+
     //post a donation camp data
     app.post('/donation-camp', async (req, res) => {
       const donation = req.body;
@@ -245,11 +259,36 @@ async function run() {
     })
 
     //get donators by postId
-    app.get('/donation-camps/donators/:postId', async(req,res)=>{
+    app.get('/donation-camps/donators/:postId', async (req, res) => {
       const postId = req.params.postId;
-      const query ={postId: postId};
+      const query = { postId: postId };
       const result = await donatesCollection.find(query).toArray()
       res.send(result);
+    })
+
+    //pause donate in donate camps
+    app.patch('/donation-camp/pause/:id', async (req, res) => {
+      const id = req.params.id
+      const query = { _id: new ObjectId(id) };
+      const updateDoc = {
+        $set: {
+          pause: true
+        }
+      };
+      const result = await donationCollection.updateOne(query, updateDoc)
+      res.send(result)
+    })
+    //unpause donate in donate camps
+    app.patch('/donation-camp/unpause/:id', async (req, res) => {
+      const id = req.params.id
+      const query = { _id: new ObjectId(id) };
+      const updateDoc = {
+        $set: {
+          pause: false
+        }
+      };
+      const result = await donationCollection.updateOne(query, updateDoc)
+      res.send(result)
     })
 
 
