@@ -168,6 +168,14 @@ async function run() {
       res.send(result)
     })
 
+    //get pets using category
+    app.get('/pets/category/:category', async(req,res)=>{
+      const {category} = req.params;
+      const query = {pet_category: category}
+      const result = await petCollection.find(query).toArray()
+      res.send(result);
+    })
+
     //getting details of single pet
     app.get('/pet/:id', async (req, res) => {
       const id = req.params.id
@@ -176,8 +184,8 @@ async function run() {
       res.send(result)
     })
 
-    //getting data posted by a user
-    app.get('/pets/:email', async (req, res) => {
+    //getting pet data posted by a user
+    app.get('/pets/:email',verifyToken, async (req, res) => {
       const email = req.params.email;
       const query = { email: email }
       const result = await petCollection.find(query).toArray()
@@ -185,7 +193,7 @@ async function run() {
     })
 
     //delete a pet
-    app.delete('/pet/:id', async (req, res) => {
+    app.delete('/pet/:id',verifyToken, async (req, res) => {
       const id = req.params.id
       const query = { _id: new ObjectId(id) }
       const result = await petCollection.deleteOne(query)
@@ -193,7 +201,7 @@ async function run() {
     })
 
     //update a pet data
-    app.patch('/updatePet/:id', async (req, res) => {
+    app.patch('/updatePet/:id',verifyToken, async (req, res) => {
       const id = req.params.id;
       const petData = req.body;
       const query = { _id: new ObjectId(id) }
@@ -207,7 +215,7 @@ async function run() {
     })
 
     //mark a pet as adopted
-    app.put('/pet/adopted/:id', async (req, res) => {
+    app.put('/pet/adopted/:id',verifyToken, async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
       const updateDoc = {
@@ -246,15 +254,6 @@ async function run() {
       const result = await adoptionCollection.insertOne(adoption)
       res.send(result);
     })
-
-    //getting categories of pet
-    // app.get('/pets/:category', async (req, res) => {
-    //   const category = req.params.category
-    //   const cursor = petCollection.find({ pet_category: category })
-    //   const result = await cursor.toArray()
-    //   res.send(result)
-    // })
-
 
     //get adoption requests
     app.get('/adoption-requests/:email', verifyToken, async (req, res) => {
@@ -331,7 +330,7 @@ async function run() {
     })
 
     //get donation camp by email
-    app.get('/donation-camps/:email', async (req, res) => {
+    app.get('/donation-camps/:email',verifyToken, async (req, res) => {
       const email = req.params.email;
       const query = { email: email }
       const result = await donationCollection.find(query).toArray()
